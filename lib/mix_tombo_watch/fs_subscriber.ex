@@ -2,7 +2,7 @@ defmodule MixTomboWatch.FsSubscriber do
   use GenServer
 
   defmodule State do
-    defstruct config: %MixTomboWatch.Config{}
+    defstruct config: %MixTomboWatch.Config{}, ports: []
   end
 
   def start_link(state) do
@@ -24,20 +24,37 @@ defmodule MixTomboWatch.FsSubscriber do
   end
 
   @impl true
-  def handle_info({:file_event, pid, {path, events}}, %State{config: config} = state)
+  def handle_info({:file_event, pid, {path, events}}, %State{} = state)
       when is_pid(pid) and is_binary(path) and is_list(events) do
-    if match_any_patterns?(path, config.patterns) do
-      run(config.commands)
-      debounce(config.debounce)
+    if match_any_patterns?(path, state.config.patterns) do
+      close_ports(state.ports)
+      ports = run(state.config.commands)
+      debounce(state.config.debounce)
+      {:noreply, %State{state | ports: ports}}
+    else
+      {:noreply, state}
     end
+  end
 
+  @impl true
+  def handle_info({port, {:data, data}}, state) when is_port(port) do
+    IO.write(data)
     {:noreply, state}
   end
 
+  defp close_ports(ports) when is_list(ports) do
+    Enum.map(ports, fn port ->
+      if not is_nil(Port.info(port)) do
+        Port.close(port)
+      end
+    end)
+  end
+
   defp run(commands) when is_list(commands) do
+    path_to_wrapper = Application.app_dir(:mix_tombo_watch, ["priv", "wrap_command.sh"])
+
     Enum.map(commands, fn command ->
-      Application.app_dir(:mix_tombo_watch, ["priv", "wrap_command.sh"])
-      |> System.cmd(["bash", "-c", command], into: IO.stream(:stdio, :line))
+      Port.open({:spawn_executable, path_to_wrapper}, [:binary, args: ["bash", "-c", command]])
     end)
   end
 
