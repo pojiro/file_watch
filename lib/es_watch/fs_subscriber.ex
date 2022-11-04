@@ -3,6 +3,7 @@ defmodule EsWatch.FsSubscriber do
 
   require Logger
 
+  @exs_file_name ".eswatch.exs"
   @sh_file_name ".eswatch.sh"
   @sh_content File.read!(Path.join("priv", @sh_file_name))
 
@@ -17,7 +18,7 @@ defmodule EsWatch.FsSubscriber do
   @impl true
   def init(_state) do
     create_wrap_command_sh(File.cwd!())
-    config = Path.join(File.cwd!(), ".es_watch.exs") |> read_config!()
+    config = Path.join(File.cwd!(), @exs_file_name) |> read_config!()
 
     case FileSystem.start_link(dirs: Enum.map(config.dirs, &Path.absname(&1))) do
       {:ok, pid} ->
