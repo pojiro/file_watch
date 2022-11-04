@@ -8,7 +8,7 @@ defmodule EsWatch.MixProject do
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escript: [main_module: EsWatch]
+      escript: [main_module: EsWatch, name: "eswatch"]
     ]
   end
 
