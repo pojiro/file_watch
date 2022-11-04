@@ -6,14 +6,11 @@ Because TDD with [mix test.watch](https://github.com/lpil/mix-test.watch) is awe
 
 ## TODO
 
-- [x] デーモン系コマンドを再起動できるようにする
 - [ ] README.md の記述
-- [ ] credo の追加
 - [ ] test の実装
 - [ ] moduledoc 等の追加
 - [ ] ライセンス選択
-- [x] phoenix_live_reload と mix_test_watch への謝辞
-- [x] copyright 付ける
+- [ ] hex publish
 
 ## Installation
 
