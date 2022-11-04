@@ -24,3 +24,7 @@ es_watch-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# eswatches
+/eswatch
+/.eswatch.sh
