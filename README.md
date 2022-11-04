@@ -14,20 +14,18 @@ Because TDD with [mix test.watch](https://github.com/lpil/mix-test.watch) is awe
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `es_watch` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:es_watch, "~> 0.1.0"}
-  ]
-end
 ```
+# clone this repo
+$ git clone https://github.com/pojiro/es_watch.git
+$ cd es_watch
+$ mix do escript.build, escript.install
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/es_watch](https://hexdocs.pm/es_watch).
+# or
+$ mix escript.install github pojiro/es_watch
+
+# if you use asdf, both of above don't forget to do
+$ asdf reshim
+```
 
 ## Acknowledgment
 
