@@ -3,7 +3,7 @@ defmodule EsWatch.FsSubscriber do
 
   require Logger
 
-  @sh_file_name ".es_watch.sh"
+  @sh_file_name ".eswatch.sh"
   @sh_content File.read!(Path.join("priv", @sh_file_name))
 
   defmodule State do
