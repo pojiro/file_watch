@@ -3,8 +3,8 @@ defmodule EsWatch.FsSubscriber do
 
   require Logger
 
-  @wrap_command_sh_file_name "wrap_command.sh"
-  @wrap_command_sh File.read!(Path.join("priv", @wrap_command_sh_file_name))
+  @sh_file_name ".es_watch.sh"
+  @sh_content File.read!(Path.join("priv", @sh_file_name))
 
   defmodule State do
     defstruct config: %EsWatch.Config{}, port_map: %{}
@@ -67,7 +67,7 @@ defmodule EsWatch.FsSubscriber do
   end
 
   defp run(commands) when is_list(commands) do
-    path_to_wrapper = Path.join(File.cwd!(), @wrap_command_sh_file_name)
+    path_to_wrapper = Path.join(File.cwd!(), @sh_file_name)
 
     Enum.reduce(commands, %{}, fn command, acc ->
       port =
@@ -98,8 +98,8 @@ defmodule EsWatch.FsSubscriber do
   end
 
   defp create_wrap_command_sh(path) do
-    path = Path.join(path, @wrap_command_sh_file_name)
-    File.write!(path, @wrap_command_sh)
+    path = Path.join(path, @sh_file_name)
+    File.write!(path, @sh_content)
     File.chmod!(path, 0o775)
   end
 
