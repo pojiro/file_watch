@@ -1,7 +1,7 @@
-defmodule MixTomboWatch.Application do
+defmodule EsWatch.Application do
   use Application
 
-  alias MixTomboWatch.FsSubscriber
+  alias EsWatch.FsSubscriber
 
   def start(_type, _args) do
     children = [FsSubscriber]

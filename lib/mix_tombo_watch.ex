@@ -1,6 +1,6 @@
-defmodule MixTomboWatch do
+defmodule EsWatch do
   @moduledoc """
-  Documentation for `MixTomboWatch`.
+  Documentation for `EsWatch`.
   """
 
   @doc """
@@ -8,7 +8,7 @@ defmodule MixTomboWatch do
 
   ## Examples
 
-      iex> MixTomboWatch.hello()
+      iex> EsWatch.hello()
       :world
 
   """
@@ -17,7 +17,7 @@ defmodule MixTomboWatch do
   end
 
   def main(_args) do
-    {:ok, _apps} = Application.ensure_all_started(:mix_tombo_watch)
+    {:ok, _apps} = Application.ensure_all_started(:es_watch)
 
     if not (Code.ensure_loaded?(IEx) && IEx.started?()) do
       Process.sleep(:infinity)

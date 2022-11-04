@@ -1,4 +1,4 @@
-defmodule MixTomboWatch.Config do
+defmodule EsWatch.Config do
   @type t :: %__MODULE__{
           patterns: list(),
           debounce: non_neg_integer(),

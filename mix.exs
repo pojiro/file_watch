@@ -1,21 +1,21 @@
-defmodule MixTomboWatch.MixProject do
+defmodule EsWatch.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :mix_tombo_watch,
+      app: :es_watch,
       version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escript: [main_module: MixTomboWatch]
+      escript: [main_module: EsWatch]
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {MixTomboWatch.Application, []},
+      mod: {EsWatch.Application, []},
       extra_applications: [:logger, :file_system]
     ]
   end

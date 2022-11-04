@@ -1,4 +1,4 @@
-defmodule MixTomboWatch.FsSubscriber do
+defmodule EsWatch.FsSubscriber do
   use GenServer
 
   require Logger
@@ -7,7 +7,7 @@ defmodule MixTomboWatch.FsSubscriber do
   @wrap_command_sh File.read!(Path.join("priv", @wrap_command_sh_file_name))
 
   defmodule State do
-    defstruct config: %MixTomboWatch.Config{}, port_map: %{}
+    defstruct config: %EsWatch.Config{}, port_map: %{}
   end
 
   def start_link(state) do
@@ -17,7 +17,7 @@ defmodule MixTomboWatch.FsSubscriber do
   @impl true
   def init(_state) do
     create_wrap_command_sh(File.cwd!())
-    config = Path.join(File.cwd!(), ".mix_tombo_watch.exs") |> read_config!()
+    config = Path.join(File.cwd!(), ".es_watch.exs") |> read_config!()
 
     case FileSystem.start_link(dirs: Enum.map(config.dirs, &Path.absname(&1))) do
       {:ok, pid} ->
@@ -103,13 +103,13 @@ defmodule MixTomboWatch.FsSubscriber do
     File.chmod!(path, 0o775)
   end
 
-  @spec read_config!(path :: String.t()) :: MixTomboWatch.Config.t()
+  @spec read_config!(path :: String.t()) :: EsWatch.Config.t()
   defp read_config!(path) do
     if File.exists?(path) do
-      Config.Reader.read!(path)[:mix_tombo_watch]
-      |> then(&struct(MixTomboWatch.Config, &1))
+      Config.Reader.read!(path)[:es_watch]
+      |> then(&struct(EsWatch.Config, &1))
     else
-      %MixTomboWatch.Config{}
+      %EsWatch.Config{}
     end
   end
 end

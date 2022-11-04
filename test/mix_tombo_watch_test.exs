@@ -1,8 +1,8 @@
-defmodule MixTomboWatchTest do
+defmodule EsWatchTest do
   use ExUnit.Case
-  doctest MixTomboWatch
+  doctest EsWatch
 
   test "greets the world" do
-    assert MixTomboWatch.hello() == :world
+    assert EsWatch.hello() == :world
   end
 end
