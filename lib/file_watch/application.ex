@@ -8,9 +8,9 @@ defmodule FileWatch.Application do
   @wrapper_content File.read!(Path.join("priv", @wrapper_file_name))
 
   def start(_type, _args) do
-    create_wrapper_file()
     FileWatch.Config.read!(config_file_path())
     configure_logger()
+    create_wrapper_file()
 
     children = [FileWatch.FsSubscriber]
     Supervisor.start_link(children, strategy: :one_for_one)
