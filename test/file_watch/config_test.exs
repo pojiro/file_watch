@@ -8,10 +8,10 @@ defmodule FileWatch.ConfigTest do
     |> Keyword.keys()
     |> Enum.map(fn key -> Application.delete_env(@app_atom, key) end)
 
-    assert_raise Mix.Error, fn -> FileWatch.Config.get!() end
+    assert_raise RuntimeError, fn -> FileWatch.Config.get!() end
   end
 
   test "read!/1" do
-    assert_raise Mix.Error, fn -> FileWatch.Config.read!("not_exist_path") end
+    assert_raise RuntimeError, fn -> FileWatch.Config.read!("not_exist_path") end
   end
 end
