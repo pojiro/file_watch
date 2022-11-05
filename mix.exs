@@ -8,9 +8,11 @@ defmodule EsWatch.MixProject do
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escript: [main_module: EsWatch, name: "eswatch"]
+      escript: [main_module: EsWatch, name: escript_file_name()]
     ]
   end
+
+  def escript_file_name(), do: "eswatch"
 
   # Run "mix help compile.app" to learn about applications.
   def application do

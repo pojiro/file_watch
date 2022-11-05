@@ -2,10 +2,7 @@ defmodule EsWatch.FsSubscriber do
   use GenServer
 
   require Logger
-
-  @exs_file_name ".eswatch.exs"
-  @sh_file_name ".eswatch.sh"
-  @sh_content File.read!(Path.join("priv", @sh_file_name))
+  alias EsWatch.Config
 
   defmodule State do
     defstruct config: %EsWatch.Config{}, port_map: %{}
@@ -17,8 +14,7 @@ defmodule EsWatch.FsSubscriber do
 
   @impl true
   def init(_state) do
-    create_wrap_command_sh(File.cwd!())
-    config = Path.join(File.cwd!(), @exs_file_name) |> read_config!()
+    config = Config.get!()
 
     case FileSystem.start_link(dirs: Enum.map(config.dirs, &Path.absname(&1))) do
       {:ok, pid} ->
@@ -68,7 +64,7 @@ defmodule EsWatch.FsSubscriber do
   end
 
   defp run(commands) when is_list(commands) do
-    path_to_wrapper = Path.join(File.cwd!(), @sh_file_name)
+    path_to_wrapper = EsWatch.Application.wrapper_file_path()
 
     Enum.reduce(commands, %{}, fn command, acc ->
       port =
@@ -96,21 +92,5 @@ defmodule EsWatch.FsSubscriber do
 
   defp match_any_patterns?(path, patterns) when is_binary(path) and is_list(patterns) do
     Enum.any?(patterns, &String.match?(path, &1))
-  end
-
-  defp create_wrap_command_sh(path) do
-    path = Path.join(path, @sh_file_name)
-    File.write!(path, @sh_content)
-    File.chmod!(path, 0o775)
-  end
-
-  @spec read_config!(path :: String.t()) :: EsWatch.Config.t()
-  defp read_config!(path) do
-    if File.exists?(path) do
-      Config.Reader.read!(path)[:es_watch]
-      |> then(&struct(EsWatch.Config, &1))
-    else
-      %EsWatch.Config{}
-    end
   end
 end
