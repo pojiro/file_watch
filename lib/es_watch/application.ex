@@ -10,6 +10,7 @@ defmodule EsWatch.Application do
   def start(_type, _args) do
     create_wrapper_file()
     EsWatch.Config.read!(config_file_path())
+    configure_logger()
 
     children = [EsWatch.FsSubscriber]
     Supervisor.start_link(children, strategy: :one_for_one)
@@ -27,5 +28,10 @@ defmodule EsWatch.Application do
     path = Path.join(File.cwd!(), @wrapper_file_name)
     File.write!(path, @wrapper_content)
     File.chmod!(path, 0o775)
+  end
+
+  defp configure_logger() do
+    Application.get_all_env(:logger)
+    |> Logger.configure()
   end
 end
