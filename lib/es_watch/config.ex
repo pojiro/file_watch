@@ -1,5 +1,5 @@
-defmodule EsWatch.Config do
-  import EsWatch.MixProject, only: [project: 0]
+defmodule FileWatch.Config do
+  import FileWatch.MixProject, only: [project: 0]
 
   @app_atom Keyword.fetch!(project(), :app)
 
@@ -11,18 +11,18 @@ defmodule EsWatch.Config do
         }
   defstruct patterns: [], debounce: 0, dirs: [""], commands: [":"]
 
-  @spec get!() :: EsWatch.Config.t()
+  @spec get!() :: FileWatch.Config.t()
   def get!() do
     config = Application.get_all_env(@app_atom)
 
     if Enum.empty?(config) do
       Mix.raise("""
       Please check #{inspect(@app_atom)} config exists in
-      #{EsWatch.Application.config_file_path()}
+      #{FileWatch.Application.config_file_path()}
       """)
     end
 
-    struct(EsWatch.Config, config)
+    struct(FileWatch.Config, config)
   end
 
   @spec read!(path :: String.t()) :: :ok
@@ -34,7 +34,7 @@ defmodule EsWatch.Config do
     File.Error ->
       Mix.raise("""
       Please check following file exists in CWD
-      #{EsWatch.Application.config_file_path()}
+      #{FileWatch.Application.config_file_path()}
       """)
   end
 end

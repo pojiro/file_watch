@@ -1,6 +1,6 @@
 import Config
 
-config :es_watch,
+config :file_watch,
   commands: ["echo hello", "echo world", "mix test"],
   patterns: [~r"lib/.*(ex)$"],
   debounce: 50

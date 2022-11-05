@@ -1,7 +1,7 @@
-defmodule EsWatch.Application do
+defmodule FileWatch.Application do
   use Application
 
-  import EsWatch.MixProject, only: [escript_file_name: 0]
+  import FileWatch.MixProject, only: [escript_file_name: 0]
 
   @config_file_name ".#{escript_file_name()}.exs"
   @wrapper_file_name ".#{escript_file_name()}.sh"
@@ -9,10 +9,10 @@ defmodule EsWatch.Application do
 
   def start(_type, _args) do
     create_wrapper_file()
-    EsWatch.Config.read!(config_file_path())
+    FileWatch.Config.read!(config_file_path())
     configure_logger()
 
-    children = [EsWatch.FsSubscriber]
+    children = [FileWatch.FsSubscriber]
     Supervisor.start_link(children, strategy: :one_for_one)
   end
 

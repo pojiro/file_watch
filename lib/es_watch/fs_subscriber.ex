@@ -1,11 +1,11 @@
-defmodule EsWatch.FsSubscriber do
+defmodule FileWatch.FsSubscriber do
   use GenServer
 
   require Logger
-  alias EsWatch.Config
+  alias FileWatch.Config
 
   defmodule State do
-    defstruct config: %EsWatch.Config{}, port_map: %{}
+    defstruct config: %FileWatch.Config{}, port_map: %{}
   end
 
   def start_link(state) do
@@ -66,7 +66,7 @@ defmodule EsWatch.FsSubscriber do
   end
 
   defp run(commands) when is_list(commands) do
-    path_to_wrapper = EsWatch.Application.wrapper_file_path()
+    path_to_wrapper = FileWatch.Application.wrapper_file_path()
 
     Enum.reduce(commands, %{}, fn command, acc ->
       port =

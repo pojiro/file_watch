@@ -1,10 +1,10 @@
-defmodule EsWatch do
+defmodule FileWatch do
   @moduledoc """
-  Documentation for `EsWatch`.
+  Documentation for `FileWatch`.
   """
 
   def main(_args) do
-    {:ok, _apps} = Application.ensure_all_started(:es_watch)
+    {:ok, _apps} = Application.ensure_all_started(:file_watch)
 
     if not (Code.ensure_loaded?(IEx) && IEx.started?()) do
       Process.sleep(:infinity)

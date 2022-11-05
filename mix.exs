@@ -1,23 +1,23 @@
-defmodule EsWatch.MixProject do
+defmodule FileWatch.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :es_watch,
+      app: :file_watch,
       version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escript: [main_module: EsWatch, name: escript_file_name()]
+      escript: [main_module: FileWatch, name: escript_file_name()]
     ]
   end
 
-  def escript_file_name(), do: "eswatch"
+  def escript_file_name(), do: "fwatch"
 
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {EsWatch.Application, []},
+      mod: {FileWatch.Application, []},
       extra_applications: [:logger, :file_system]
     ]
   end
