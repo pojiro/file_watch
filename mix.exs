@@ -26,7 +26,8 @@ defmodule FileWatch.MixProject do
   defp deps do
     [
       {:file_system, "~> 0.2"},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
 end
