@@ -6,9 +6,6 @@ Because TDD with [mix test.watch](https://github.com/lpil/mix-test.watch) is awe
 
 ## TODO
 
-- [ ] README.md の記述
-- [ ] test の実装
-- [ ] moduledoc 等の追加
 - [ ] ライセンス選択
 - [ ] hex publish
 
