@@ -6,6 +6,8 @@ Because TDD with [mix test.watch](https://github.com/lpil/mix-test.watch) is awe
 
 ## Usage
 
+https://hexdocs.pm/file_watch/FileWatch.html
+
 ### Installation
 
 ```
