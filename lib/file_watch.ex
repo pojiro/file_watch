@@ -6,11 +6,11 @@ defmodule FileWatch do
 
   ### How to run
 
-      $ ./fwatch
+      $ fwatch
 
   ### How to get config template
 
-      $ ./fwatch --config-template
+      $ fwatch --config-template
   """
 
   def main(args) do

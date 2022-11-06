@@ -19,17 +19,17 @@ $ mix escript.install github pojiro/file_watch
 # or
 $ mix escript.install hex file_watch
 
-# if you use asdf, both of above don't forget to do
+# if you use asdf, after both of above don't forget to do
 $ asdf reshim
 ```
 
 ### How to run
 
-    $ ./fwatch
+    $ fwatch
 
 ### How to get config template
 
-    $ ./fwatch --config-template
+    $ fwatch --config-template
 
 ## Acknowledgment
 
