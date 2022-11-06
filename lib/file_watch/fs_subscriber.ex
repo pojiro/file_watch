@@ -33,7 +33,7 @@ defmodule FileWatch.FsSubscriber do
   def handle_info({:file_event, pid, {path, events}}, %State{} = state)
       when is_pid(pid) and is_binary(path) and is_list(events) do
     if match_any_patterns?(path, state.config.patterns) do
-      Logger.debug("matched path: #{path}")
+      Logger.debug("matched path: #{path} 👀")
 
       close_ports(Map.keys(state.port_map))
       port_map = run(state.config.commands)
@@ -54,7 +54,7 @@ defmodule FileWatch.FsSubscriber do
   def handle_info({port, {:exit_status, exit_status}}, state) when is_port(port) do
     if Map.has_key?(state.port_map, port) do
       command = Map.get(state.port_map, port)
-      Logger.debug("\"#{command}\" exit, status: #{exit_status}")
+      Logger.debug("command: \"#{command}\" exit, status: #{exit_status} 👀")
     end
 
     {:noreply, state}
