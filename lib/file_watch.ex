@@ -2,7 +2,7 @@ defmodule FileWatch do
   @shortdoc FileWatch.MixProject.description()
   @moduledoc """
 
-  #{@shortdoc}
+  #{@shortdoc} v#{FileWatch.MixProject.version()}
 
   ### How to run
 

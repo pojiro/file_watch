@@ -6,7 +6,7 @@ defmodule FileWatch.MixProject do
   def project do
     [
       app: :file_watch,
-      version: "0.1.2",
+      version: version(),
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -16,8 +16,9 @@ defmodule FileWatch.MixProject do
     ]
   end
 
+  def version(), do: "0.1.2"
   def escript_file_name(), do: "fwatch"
-  def description(), do: "File Watcher 👀, like mix test.watch"
+  def description(), do: "File Watcher 👀, like mix test.watch."
 
   # Run "mix help compile.app" to learn about applications.
   def application do
