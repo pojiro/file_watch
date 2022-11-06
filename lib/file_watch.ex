@@ -25,6 +25,7 @@ defmodule FileWatch do
     case FileWatch.Config.read() do
       {:ok, config} ->
         FileWatch.Logger.configure(config)
+        FileWatch.Assets.create_wrapper_file()
         Application.put_env(:file_watch, :main_pid, pid)
         start_link(config: config)
 
