@@ -1,7 +1,10 @@
 defmodule FileWatch.Config do
-  import FileWatch.MixProject, only: [project: 0]
+  @moduledoc false
+  import FileWatch.MixProject, only: [project: 0, escript_file_name: 0]
 
   @app_atom Keyword.fetch!(project(), :app)
+  @config_file_name ".#{escript_file_name()}.exs"
+  @template_content File.read!(Path.join("priv", @config_file_name))
 
   @type t :: %__MODULE__{
           patterns: list(),
@@ -11,47 +14,60 @@ defmodule FileWatch.Config do
         }
   defstruct patterns: [], debounce: 0, dirs: [""], commands: [":"]
 
-  @spec get!() :: FileWatch.Config.t()
-  def get!() do
-    config = Application.get_all_env(@app_atom)
-
-    if Enum.empty?(config) do
-      error_lines = [
-        "Please check #{inspect(@app_atom)} config exists in",
-        FileWatch.Application.config_file_path()
-      ]
-
-      error_lines
-      |> highlight_error()
-      |> raise()
-    end
-
-    struct(FileWatch.Config, config)
+  @spec create_template() :: :ok
+  def create_template() do
+    FileWatch.Assets.config_file_path()
+    |> FileWatch.Config.create_template()
   end
 
-  @spec read!(path :: String.t()) :: :ok
-  def read!(path) do
-    path
-    |> Config.Reader.read!()
-    |> Application.put_all_env()
+  @spec create_template(path :: String.t()) :: :ok
+  def create_template(path) do
+    lines =
+      if File.exists?(path) do
+        ["config file is already exists."]
+      else
+        File.write!(path, @template_content)
+
+        ["The template is generated under CWD with the name `#{@config_file_name}`."]
+      end
+
+    lines |> highlight() |> IO.puts()
+  end
+
+  @spec get(list()) :: __MODULE__.t()
+  def get(config) do
+    config = Keyword.get(config, @app_atom, nil)
+
+    if is_nil(config) do
+      %__MODULE__{}
+    else
+      struct(__MODULE__, config)
+    end
+  end
+
+  @spec read() :: {:ok, keyword()} | :error
+  def read() do
+    FileWatch.Assets.config_file_path() |> read()
+  end
+
+  @spec read(path :: String.t()) :: {:ok, keyword()} | :error
+  def read(path) do
+    {:ok, Config.Reader.read!(path)}
   rescue
     File.Error ->
       error_lines = [
         "Please check following file exists in CWD",
-        FileWatch.Application.config_file_path()
+        "path: #{path}",
+        "Or use `--config-template` option to get it."
       ]
 
-      error_lines
-      |> highlight_error()
-      |> raise()
+      error_lines |> highlight() |> IO.puts()
+      :error
   end
 
-  defp highlight_error(error_lines) do
+  defp highlight(lines) do
     """
-    \n
-    #{String.duplicate("=", 80)}
-    \t#{Enum.join(error_lines, "\n\t")}
-    #{String.duplicate("=", 80)}
+    \n\s\s#{Enum.join(lines, "\n\s\s")}
     """
   end
 end

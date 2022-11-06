@@ -1,17 +1,26 @@
 defmodule FileWatch.ConfigTest do
   use ExUnit.Case
 
-  @app_atom Keyword.fetch!(FileWatch.MixProject.project(), :app)
+  import ExUnit.CaptureIO
 
-  test "get!/0" do
-    Application.get_all_env(@app_atom)
-    |> Keyword.keys()
-    |> Enum.map(fn key -> Application.delete_env(@app_atom, key) end)
+  @tag :tmp_dir
+  test "create_template/1", %{tmp_dir: tmp_dir_path} do
+    assert capture_io(fn ->
+             tmp_dir_path
+             |> Path.join("test_config.exs")
+             |> FileWatch.Config.create_template()
+           end) =~ "generated under"
 
-    assert_raise RuntimeError, fn -> FileWatch.Config.get!() end
+    assert File.ls!(tmp_dir_path) |> Enum.count() > 0
+  end
+
+  test "get/0" do
+    assert %FileWatch.Config{} = FileWatch.Config.get([])
   end
 
   test "read!/1" do
-    assert_raise RuntimeError, fn -> FileWatch.Config.read!("not_exist_path") end
+    assert capture_io(fn ->
+             assert :error = FileWatch.Config.read("not_exist_path")
+           end) =~ "Please check"
   end
 end

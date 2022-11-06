@@ -28,3 +28,4 @@ file_watch-*.tar
 # fwatches
 /fwatch
 /.fwatch.sh
+/.fwatch.exs

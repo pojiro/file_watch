@@ -1,25 +1,28 @@
 defmodule FileWatch.FsSubscriber do
+  @moduledoc false
   use GenServer
 
   require Logger
+  alias FileWatch.Assets
   alias FileWatch.Config
 
   defmodule State do
+    @moduledoc false
     defstruct config: %FileWatch.Config{}, port_map: %{}
   end
 
-  def start_link(state) do
-    GenServer.start_link(__MODULE__, state, name: __MODULE__)
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
   @impl true
-  def init(_state) do
-    config = Config.get!()
+  def init([config: config] = args) when is_list(args) do
+    config_struct = Config.get(config)
 
-    case FileSystem.start_link(dirs: Enum.map(config.dirs, &Path.absname(&1))) do
+    case FileSystem.start_link(dirs: Enum.map(config_struct.dirs, &Path.absname(&1))) do
       {:ok, pid} ->
         FileSystem.subscribe(pid)
-        {:ok, %State{config: config}}
+        {:ok, %State{config: config_struct}}
 
       other ->
         {:stop, other}
@@ -66,11 +69,9 @@ defmodule FileWatch.FsSubscriber do
   end
 
   defp run(commands) when is_list(commands) do
-    path_to_wrapper = FileWatch.Application.wrapper_file_path()
-
     Enum.reduce(commands, %{}, fn command, acc ->
       port =
-        Port.open({:spawn_executable, path_to_wrapper}, [
+        Port.open({:spawn_executable, Assets.wrapper_file_path()}, [
           :binary,
           :exit_status,
           args: ["bash", "-c", command]

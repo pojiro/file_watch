@@ -1,13 +1,58 @@
 defmodule FileWatch do
+  @shortdoc "File Watcher 👀, like mix test.watch"
   @moduledoc """
-  Documentation for `FileWatch`.
+
+  #{@shortdoc}
+
+  ## How to run
+
+    $ ./fwatch
+
+  ## How to get config template
+
+    $ ./fwatch --config-template
   """
 
-  def main(_args) do
-    {:ok, _apps} = Application.ensure_all_started(:file_watch)
-
-    if not (Code.ensure_loaded?(IEx) && IEx.started?()) do
-      Process.sleep(:infinity)
+  def main(args) do
+    case OptionParser.parse(args, strict: [config_template: :boolean]) do
+      {[], [], []} -> run(self())
+      {[config_template: true], [], []} -> FileWatch.Config.create_template()
+      _ -> help()
     end
+  end
+
+  def run(pid) do
+    case FileWatch.Config.read() do
+      {:ok, config} ->
+        FileWatch.Logger.configure(config)
+        Application.put_env(:file_watch, :main_pid, pid)
+        start_link(config: config)
+
+        receive do
+          {^pid, :exit} -> :ok
+        end
+
+      _ ->
+        :ok
+    end
+  end
+
+  def exit!() do
+    Application.fetch_env!(:file_watch, :main_pid)
+    |> then(&send(&1, {&1, :exit}))
+  end
+
+  defp help(), do: IO.puts(@moduledoc)
+
+  use Supervisor
+
+  def start_link(args) when is_list(args) do
+    Supervisor.start_link(__MODULE__, args, name: __MODULE__)
+  end
+
+  @impl Supervisor
+  def init(args) when is_list(args) do
+    children = [{FileWatch.FsSubscriber, args}]
+    Supervisor.init(children, strategy: :one_for_one)
   end
 end
