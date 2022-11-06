@@ -1,16 +1,16 @@
 defmodule FileWatch do
-  @shortdoc "File Watcher 👀, like mix test.watch"
+  @shortdoc FileWatch.MixProject.description()
   @moduledoc """
 
   #{@shortdoc}
 
-  ## How to run
+  ### How to run
 
-    $ ./fwatch
+      $ ./fwatch
 
-  ## How to get config template
+  ### How to get config template
 
-    $ ./fwatch --config-template
+      $ ./fwatch --config-template
   """
 
   def main(args) do
