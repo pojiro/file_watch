@@ -30,7 +30,7 @@ defmodule FileWatch do
         start_link(config: config)
 
         receive do
-          {^pid, :exit} -> :ok
+          :exit -> :ok
         end
 
       _ ->
@@ -39,8 +39,7 @@ defmodule FileWatch do
   end
 
   def exit!() do
-    Application.fetch_env!(:file_watch, :main_pid)
-    |> then(&send(&1, {&1, :exit}))
+    Application.fetch_env!(:file_watch, :main_pid) |> send(:exit)
   end
 
   defp help(), do: IO.puts(@moduledoc)

@@ -12,7 +12,7 @@ defmodule FileWatch.Config do
           dirs: [String.t()],
           commands: [String.t()]
         }
-  defstruct patterns: [], debounce: 0, dirs: [""], commands: [":"]
+  defstruct patterns: [], debounce: 0, dirs: ["."], commands: [":"]
 
   @spec create_template() :: :ok
   def create_template() do
