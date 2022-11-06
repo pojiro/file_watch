@@ -4,9 +4,10 @@ Automatically run your commands each time you save a file.
 
 Because TDD with [mix test.watch](https://github.com/lpil/mix-test.watch) is awesome🎉
 
-## Usage
+- https://hex.pm/packages/file_watch
+- https://hexdocs.pm/file_watch/FileWatch.html
 
-https://hexdocs.pm/file_watch/FileWatch.html
+## Usage
 
 ### Installation
 
@@ -25,13 +26,16 @@ $ mix escript.install hex file_watch
 $ asdf reshim
 ```
 
-### How to run
+### Get config template
 
-    $ fwatch
-
-### How to get config template
+config template, .fwatch.exs, will be generated under CWD.
+configuration details are described in it.
 
     $ fwatch --config-template
+
+### Start watch
+
+    $ fwatch
 
 ## Acknowledgment
 

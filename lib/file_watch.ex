@@ -4,13 +4,16 @@ defmodule FileWatch do
 
   #{@shortdoc} v#{FileWatch.MixProject.version()}
 
-  ### How to run
+  ### Get config template
 
-      $ fwatch
-
-  ### How to get config template
+  config template, #{FileWatch.Assets.config_file_name()}, will be generated under CWD.
+  configuration details are described in it.
 
       $ fwatch --config-template
+
+  ### Start watch
+
+      $ fwatch
   """
 
   def main(args) do
