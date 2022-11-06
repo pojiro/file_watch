@@ -6,7 +6,7 @@ defmodule FileWatch do
 
   ### Get config template
 
-  config template, #{FileWatch.Assets.config_file_name()}, will be generated under CWD.
+  config template, #{FileWatch.Config.file_name()}, will be generated under CWD.
   configuration details are described in it.
 
       $ fwatch --config-template

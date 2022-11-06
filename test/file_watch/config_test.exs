@@ -14,11 +14,11 @@ defmodule FileWatch.ConfigTest do
     assert File.ls!(tmp_dir_path) |> Enum.count() > 0
   end
 
-  test "get/0" do
+  test "get/1" do
     assert %FileWatch.Config{} = FileWatch.Config.get([])
   end
 
-  test "read!/1" do
+  test "read/1" do
     assert capture_io(fn ->
              assert :error = FileWatch.Config.read("not_exist_path")
            end) =~ "Please check"

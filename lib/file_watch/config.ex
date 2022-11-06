@@ -14,11 +14,14 @@ defmodule FileWatch.Config do
         }
   defstruct patterns: [], debounce: 0, dirs: ["."], commands: [":"]
 
-  @spec create_template() :: :ok
-  def create_template() do
-    FileWatch.Assets.config_file_path()
-    |> FileWatch.Config.create_template()
+  def file_name(), do: @config_file_name
+
+  def file_path() do
+    Path.join(File.cwd!(), @config_file_name)
   end
+
+  @spec create_template() :: :ok
+  def create_template(), do: file_path() |> create_template()
 
   @spec create_template(path :: String.t()) :: :ok
   def create_template(path) do
@@ -28,7 +31,7 @@ defmodule FileWatch.Config do
       else
         File.write!(path, @template_content)
 
-        ["The template is generated under CWD with the name `#{@config_file_name}`."]
+        ["#{@config_file_name} is generated under CWD."]
       end
 
     lines |> highlight() |> IO.puts()
@@ -46,9 +49,7 @@ defmodule FileWatch.Config do
   end
 
   @spec read() :: {:ok, keyword()} | :error
-  def read() do
-    FileWatch.Assets.config_file_path() |> read()
-  end
+  def read(), do: file_path() |> read()
 
   @spec read(path :: String.t()) :: {:ok, keyword()} | :error
   def read(path) do
