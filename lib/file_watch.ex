@@ -32,12 +32,18 @@ defmodule FileWatch do
         Application.put_env(:file_watch, :main_pid, pid)
         start_link(config: config)
 
-        receive do
-          :exit -> :ok
+        if not (Code.ensure_loaded?(IEx) && IEx.started?()) do
+          recieve_exit()
         end
 
       _ ->
         :ok
+    end
+  end
+
+  def recieve_exit() do
+    receive do
+      :exit -> :ok
     end
   end
 
