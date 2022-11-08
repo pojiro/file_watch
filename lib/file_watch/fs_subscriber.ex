@@ -3,12 +3,15 @@ defmodule FileWatch.FsSubscriber do
   use GenServer
 
   require Logger
-  alias FileWatch.Assets
-  alias FileWatch.Config
 
   defmodule State do
     @moduledoc false
-    defstruct config: %FileWatch.Config{}, port_map: %{}
+    @type t :: %__MODULE__{
+            config: FileWatch.Config.t(),
+            port_map: map(),
+            wrapper_file_path: String.t()
+          }
+    defstruct config: %FileWatch.Config{}, port_map: %{}, wrapper_file_path: ""
   end
 
   def start_link(args) do
@@ -16,13 +19,13 @@ defmodule FileWatch.FsSubscriber do
   end
 
   @impl true
-  def init([config: config] = args) when is_list(args) do
-    config_struct = Config.get(config)
+  def init(config: config, wrapper_file_path: wrapper_file_path) when is_list(config) do
+    config_struct = struct(FileWatch.Config, config)
 
     case FileSystem.start_link(dirs: Enum.map(config_struct.dirs, &Path.absname(&1))) do
       {:ok, pid} ->
         FileSystem.subscribe(pid)
-        {:ok, %State{config: config_struct}}
+        {:ok, %State{config: config_struct, wrapper_file_path: wrapper_file_path}}
 
       other ->
         {:stop, other}
@@ -36,8 +39,20 @@ defmodule FileWatch.FsSubscriber do
       Logger.debug("matched path: #{path} 👀")
 
       close_ports(Map.keys(state.port_map))
-      port_map = run(state.config.commands)
+
+      port_map =
+        case :os.type() do
+          {:win32, _} ->
+            IO.puts("Windows Not Supported 👀")
+            FileWatch.exit()
+
+          _ ->
+            run(state.config.commands, state.wrapper_file_path)
+            |> then(&to_port_map(state.config.commands, &1))
+        end
+
       debounce(state.config.debounce)
+
       {:noreply, %State{state | port_map: port_map}}
     else
       {:noreply, state}
@@ -60,25 +75,29 @@ defmodule FileWatch.FsSubscriber do
     {:noreply, state}
   end
 
-  defp close_ports(ports) when is_list(ports) do
-    Enum.map(ports, fn port ->
-      if not is_nil(Port.info(port)) do
-        Port.close(port)
-      end
-    end)
+  defp close_port(port) when is_port(port) do
+    if not is_nil(Port.info(port)), do: Port.close(port)
   end
 
-  defp run(commands) when is_list(commands) do
-    Enum.reduce(commands, %{}, fn command, acc ->
-      port =
-        Port.open({:spawn_executable, Assets.wrapper_file_path()}, [
-          :binary,
-          :exit_status,
-          args: ["bash", "-c", command]
-        ])
+  defp close_ports(ports) when is_list(ports) do
+    Enum.map(ports, &close_port(&1))
+  end
 
-      Map.put(acc, port, command)
-    end)
+  def to_port_map(commands, ports) do
+    Enum.zip(commands, ports)
+    |> Enum.reduce(%{}, fn {command, port}, port_map -> Map.put(port_map, port, command) end)
+  end
+
+  def run(commands, wrapper_file_path) when is_list(commands) and is_binary(wrapper_file_path) do
+    Enum.map(commands, fn command -> run(command, wrapper_file_path) end)
+  end
+
+  def run(command, wrapper_file_path) when is_binary(command) and is_binary(wrapper_file_path) do
+    Port.open({:spawn_executable, wrapper_file_path}, [
+      :binary,
+      :exit_status,
+      args: ["bash", "-c", command]
+    ])
   end
 
   defp debounce(milliseconds) do

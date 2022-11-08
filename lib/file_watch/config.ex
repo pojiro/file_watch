@@ -1,10 +1,5 @@
 defmodule FileWatch.Config do
   @moduledoc false
-  import FileWatch.MixProject, only: [project: 0, escript_file_name: 0]
-
-  @app_atom Keyword.fetch!(project(), :app)
-  @config_file_name ".#{escript_file_name()}.exs"
-  @template_content File.read!(Path.join("priv", @config_file_name))
 
   @type t :: %__MODULE__{
           patterns: list(),
@@ -13,62 +8,4 @@ defmodule FileWatch.Config do
           commands: [String.t()]
         }
   defstruct patterns: [], debounce: 0, dirs: ["."], commands: [":"]
-
-  def file_name(), do: @config_file_name
-
-  def file_path() do
-    Path.join(File.cwd!(), @config_file_name)
-  end
-
-  @spec create_template() :: :ok
-  def create_template(), do: file_path() |> create_template()
-
-  @spec create_template(path :: String.t()) :: :ok
-  def create_template(path) do
-    lines =
-      if File.exists?(path) do
-        ["config file is already exists."]
-      else
-        File.write!(path, @template_content)
-
-        ["#{@config_file_name} is generated under CWD."]
-      end
-
-    lines |> highlight() |> IO.puts()
-  end
-
-  @spec get(list()) :: __MODULE__.t()
-  def get(config) do
-    config = Keyword.get(config, @app_atom, nil)
-
-    if is_nil(config) do
-      %__MODULE__{}
-    else
-      struct(__MODULE__, config)
-    end
-  end
-
-  @spec read() :: {:ok, keyword()} | :error
-  def read(), do: file_path() |> read()
-
-  @spec read(path :: String.t()) :: {:ok, keyword()} | :error
-  def read(path) do
-    {:ok, Config.Reader.read!(path)}
-  rescue
-    File.Error ->
-      error_lines = [
-        "Please check following file exists in CWD",
-        "path: #{path}",
-        "Or use `--config-template` option to get it."
-      ]
-
-      error_lines |> highlight() |> IO.puts()
-      :error
-  end
-
-  defp highlight(lines) do
-    """
-    \n\s\s#{Enum.join(lines, "\n\s\s")}
-    """
-  end
 end

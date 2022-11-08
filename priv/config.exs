@@ -1,5 +1,3 @@
-import Config
-
 config :file_watch,
   # dirs to be watched
   dirs: ["."],
@@ -13,7 +11,3 @@ config :file_watch,
   # if your editor touches multiple files in a short period,
   # it can be avoided by increasing the debounce(msec)
   debounce: 100
-
-config :logger,
-  # use :debug to show matched path and ran command
-  level: :none
