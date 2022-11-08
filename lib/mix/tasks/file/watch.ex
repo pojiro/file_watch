@@ -9,7 +9,7 @@ defmodule Mix.Tasks.File.Watch do
 
       $ mix file.watch --config-template
 
-  ### start watch
+  ### Start watch
 
       $ mix file.watch
   """
