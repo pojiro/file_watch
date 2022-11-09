@@ -14,6 +14,10 @@ defmodule FileWatch.Assets do
     # use :debug to show matched path and ran command
     #     :none  to suppress logs
     level: :debug
+
+  # On Windows :file_system needs inotifywait.exe,
+  # uncomment the following line and configure path to it
+  # config :file_system, :fs_windows, executable_file: "path/to/inotifywait.exe"
   """
   @wrapper_content File.read!(Path.join("priv", @wrapper_file_name))
 
