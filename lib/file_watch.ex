@@ -33,22 +33,21 @@ defmodule FileWatch do
     end
   end
 
-  @spec run(assets_dir_path :: String.t()) :: :ok
+  @spec run(assets_dir_path :: String.t()) :: :ok | :error
   def run(assets_dir_path) do
-    Path.join(assets_dir_path, Assets.config_file_name())
-    |> Assets.read_config()
-    |> case do
-      {:ok, config} ->
-        Keyword.get(config, :logger, []) |> Logger.configure()
+    config_file_path = Path.join(assets_dir_path, Assets.config_file_name())
 
-        config = Keyword.get(config, :file_watch, [])
+    case Assets.read_config(config_file_path) do
+      {:ok, config} ->
+        Application.put_all_env(config)
+        Application.get_all_env(:logger) |> Logger.configure()
+
         wrapper_file_path = Path.join(assets_dir_path, Assets.wrapper_file_name())
         Assets.create_wrapper_file(wrapper_file_path)
+        run_impl(wrapper_file_path)
 
-        run_impl(config, wrapper_file_path)
-
-      _ ->
-        :ok
+      :error ->
+        :error
     end
   end
 
@@ -56,11 +55,11 @@ defmodule FileWatch do
   run_impl/2 is the essential function of :file_watch,
   which can be called either as an escript or as a mix task.
   """
-  @spec run_impl(config :: list(), wrapper_file_path :: String.t()) :: :ok
-  def run_impl(config, wrapper_file_path) when is_list(config) and is_binary(wrapper_file_path) do
+  @spec run_impl(wrapper_file_path :: String.t()) :: :ok
+  def run_impl(wrapper_file_path) when is_binary(wrapper_file_path) do
     Application.put_env(:file_watch, :main_pid, self())
 
-    start_link(config: config, wrapper_file_path: wrapper_file_path)
+    start_link(config: Application.get_all_env(:file_watch), wrapper_file_path: wrapper_file_path)
 
     if on_iex?(), do: :ok, else: receive(do: (:exit -> :ok))
   end

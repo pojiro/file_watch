@@ -12,7 +12,8 @@ defmodule FileWatch.Assets do
 
   config :logger,
     # use :debug to show matched path and ran command
-    level: :none
+    #     :none  to suppress logs
+    level: :debug
   """
   @wrapper_content File.read!(Path.join("priv", @wrapper_file_name))
 

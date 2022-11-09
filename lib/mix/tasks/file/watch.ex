@@ -27,20 +27,18 @@ defmodule Mix.Tasks.File.Watch do
 
         if config == [] do
           """
-          :file_watch config doesn't exist in config.exs
-          --config-template option shows configuration template
+          :file_watch config doesn't exist in config file,
+          --config-template option shows config template
           """
           |> FileWatch.highlight()
           |> Mix.raise()
         else
           wrapper_file_path = Path.join(assets_dir_path, Assets.wrapper_file_name())
-          FileWatch.run_impl(config, wrapper_file_path)
+          FileWatch.run_impl(wrapper_file_path)
         end
 
       {[config_template: true], [], []} ->
-        "#{Path.join(assets_dir_path, "config.exs") |> File.read!()}"
-        |> FileWatch.highlight()
-        |> IO.puts()
+        show_config_template(assets_dir_path)
 
       _ ->
         help()
@@ -48,4 +46,10 @@ defmodule Mix.Tasks.File.Watch do
   end
 
   defp help(), do: @moduledoc |> FileWatch.highlight() |> IO.puts()
+
+  defp show_config_template(assets_dir_path) do
+    "#{Path.join(assets_dir_path, "config.exs") |> File.read!()}"
+    |> FileWatch.highlight()
+    |> IO.puts()
+  end
 end
