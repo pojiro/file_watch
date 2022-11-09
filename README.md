@@ -11,8 +11,8 @@ Because TDD with [mix test.watch](https://github.com/lpil/mix-test.watch) is awe
 
 ### Prerequisites
 
-- On Linux you may need to install `inotify-tools`.
-- On Windows you need to install `inotifywait.exe`.
+- On Linux you may need to install [`inotify-tools`](https://github.com/inotify-tools/inotify-tools).
+- On Windows you need to install [`inotifywait.exe`](https://github.com/thekid/inotify-win).
 
 ### Installation
 
