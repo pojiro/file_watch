@@ -50,6 +50,11 @@ FileWatch uses or refs the following OSS and so on,
 - refs [mix test.watch](https://github.com/lpil/mix-test.watch) for architecture
 - refs [Phoenix live-reload](https://github.com/phoenixframework/phoenix_live_reload) for debounce
 
+## Other Info
+
+I didn't know about `fswatch` until I developed FileWatch.
+If FileWatch doesn't fit your needs, please check out [`fswatch`](https://github.com/emcrisostomo/fswatch).
+
 ---
 
 Copyright © 2022 Ryota Kinukawa
