@@ -42,14 +42,10 @@ defmodule FileWatch.FsSubscriber do
 
       port_map =
         case :os.type() do
-          {:win32, _} ->
-            IO.puts("Windows Not Supported 👀")
-            FileWatch.exit()
-
-          _ ->
-            run(state.config.commands, state.wrapper_file_path)
-            |> then(&to_port_map(state.config.commands, &1))
+          {:win32, _} -> run_on_win(state.config.commands)
+          _ -> run(state.config.commands, state.wrapper_file_path)
         end
+        |> then(&to_port_map(state.config.commands, &1))
 
       debounce(state.config.debounce)
 
@@ -97,6 +93,18 @@ defmodule FileWatch.FsSubscriber do
       :binary,
       :exit_status,
       args: ["bash", "-c", command]
+    ])
+  end
+
+  def run_on_win(commands) when is_list(commands) do
+    Enum.map(commands, fn command -> run_on_win(command) end)
+  end
+
+  def run_on_win(command) when is_binary(command) do
+    Port.open({:spawn_executable, System.find_executable("cmd")}, [
+      :binary,
+      :exit_status,
+      args: ["/c", command]
     ])
   end
 
