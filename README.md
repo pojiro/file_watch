@@ -48,7 +48,7 @@ FileWatch uses or refs the following OSS and so on,
 
 - uses [FileSystem](https://github.com/falood/file_system) for detecting file has been touched
 - refs [mix test.watch](https://github.com/lpil/mix-test.watch) for architecture
-- refs [Provides live-reload](https://github.com/phoenixframework/phoenix_live_reload) for debounce
+- refs [Phoenix live-reload](https://github.com/phoenixframework/phoenix_live_reload) for debounce
 
 ---
 
