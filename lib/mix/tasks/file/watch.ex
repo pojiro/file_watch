@@ -7,17 +7,22 @@ defmodule Mix.Tasks.File.Watch do
 
   configuration details are described in it.
 
-      $ mix file.watch --config-template
+  ```
+  mix file.watch --config-template
+  ```
 
   ### Start watch
 
-      $ mix file.watch
+  ```
+  mix file.watch
+  ```
   """
 
   use Mix.Task
 
   alias FileWatch.Assets
 
+  @doc false
   def run(args) do
     assets_dir_path = Application.app_dir(:file_watch, ["priv"])
 
