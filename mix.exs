@@ -12,7 +12,13 @@ defmodule FileWatch.MixProject do
       deps: deps(),
       escript: [main_module: FileWatch, name: escript_file_name()],
       description: description(),
-      package: package()
+      package: package(),
+      docs: [
+        api_reference: false,
+        extras: ["README.md"],
+        extra_section: "README",
+        main: "readme"
+      ]
     ]
   end
 

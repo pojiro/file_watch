@@ -17,6 +17,7 @@ defmodule FileWatch do
 
   alias FileWatch.Assets
 
+  @doc false
   def main(args) do
     assets_dir_path = File.cwd!()
 
@@ -33,6 +34,7 @@ defmodule FileWatch do
     end
   end
 
+  @doc false
   @spec run(assets_dir_path :: String.t()) :: :ok | :error
   def run(assets_dir_path) do
     config_file_path = Path.join(assets_dir_path, Assets.config_file_name())
@@ -51,27 +53,33 @@ defmodule FileWatch do
     end
   end
 
-  @doc """
-  run_impl/2 is the essential function of :file_watch,
-  which can be called either as an escript or as a mix task.
-  """
+  @doc false
   @spec run_impl(wrapper_file_path :: String.t()) :: :ok
   def run_impl(wrapper_file_path) when is_binary(wrapper_file_path) do
+    # NOTE: run_impl/2 is the essential function of :file_watch,
+    # which can be called either as an escript or as a mix task.
+
     Application.put_env(:file_watch, :main_pid, self())
 
-    start_link(config: Application.get_all_env(:file_watch), wrapper_file_path: wrapper_file_path)
+    FileWatch.Supervisor.start_link(
+      config: Application.get_all_env(:file_watch),
+      wrapper_file_path: wrapper_file_path
+    )
 
     if on_iex?(), do: :ok, else: receive(do: (:exit -> :ok))
   end
 
+  @doc false
   def exit() do
     Application.fetch_env!(:file_watch, :main_pid) |> send(:exit)
   end
 
+  @doc false
   def highlight(binary) when is_binary(binary) do
     binary |> String.trim_trailing() |> String.split("\n") |> highlight()
   end
 
+  @doc false
   def highlight(lines) when is_list(lines) do
     """
     \n\s\s#{Enum.join(lines, "\n\s\s")}
@@ -82,17 +90,5 @@ defmodule FileWatch do
 
   defp on_iex?() do
     Code.ensure_loaded?(IEx) and IEx.started?()
-  end
-
-  use Supervisor
-
-  def start_link(args) when is_list(args) do
-    Supervisor.start_link(__MODULE__, args, name: __MODULE__)
-  end
-
-  @impl Supervisor
-  def init(args) when is_list(args) do
-    children = [{FileWatch.FsSubscriber, args}]
-    Supervisor.init(children, strategy: :one_for_one)
   end
 end
