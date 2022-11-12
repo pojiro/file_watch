@@ -4,15 +4,11 @@ defmodule FileWatch.FsSubscriberTest do
   alias FileWatch.Assets
   alias FileWatch.FsSubscriber
 
-  test "run_on_unix/2 single command" do
+  test "run/2" do
     wrapper_file_path = Path.join("priv", Assets.wrapper_file_name())
-    port = FsSubscriber.run_on_unix("echo hello", wrapper_file_path)
-    assert_receive {^port, {:data, "hello\n"}}
-  end
 
-  test "run_on_unix/2 multiple commands" do
-    wrapper_file_path = Path.join("priv", Assets.wrapper_file_name())
-    [port_1, port_2] = FsSubscriber.run_on_unix(["echo hello", "echo world"], wrapper_file_path)
+    [port_1, port_2] =
+      ["echo hello", "echo world"] |> Enum.map(&FsSubscriber.run(&1, wrapper_file_path))
 
     assert_receive {^port_1, {:data, "hello\n"}}
     assert_receive {^port_2, {:data, "world\n"}}
