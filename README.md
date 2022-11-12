@@ -16,19 +16,19 @@ Because TDD with [mix test.watch](https://github.com/lpil/mix-test.watch) is awe
 
 ### Installation
 
+Install escript from hex or github,  
+(if you use asdf, after following. Don't forget to do `asdf reshim`)
+
 ```
-# clone this repo
-$ git clone https://github.com/pojiro/file_watch.git
-$ cd file_watch
-$ mix do escript.build, escript.install
+mix escript.install hex file_watch # Or mix escript.install github pojiro/file_watch
+```
 
-# or
-$ mix escript.install github pojiro/file_watch
-# or
-$ mix escript.install hex file_watch
+Or install from source build,
 
-# if you use asdf, after both of above don't forget to do
-$ asdf reshim
+```
+git clone https://github.com/pojiro/file_watch.git
+cd file_watch
+mix do escript.build, escript.install
 ```
 
 ### Get config template
@@ -36,11 +36,15 @@ $ asdf reshim
 config template, .fwatch.exs, will be generated under CWD.
 configuration details are described in it.
 
-    $ fwatch --config-template
+```
+fwatch --config-template
+```
 
 ### Start watch
 
-    $ fwatch
+```
+fwatch
+```
 
 ## Acknowledgment
 

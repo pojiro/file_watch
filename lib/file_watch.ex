@@ -8,11 +8,15 @@ defmodule FileWatch do
   config template, #{FileWatch.Assets.config_file_name()}, will be generated under CWD.
   configuration details are described in it.
 
-      $ fwatch --config-template
+  ```
+  fwatch --config-template
+  ```
 
   ### Start watch
 
-      $ fwatch
+  ```
+  fwatch
+  ```
   """
 
   alias FileWatch.Assets
