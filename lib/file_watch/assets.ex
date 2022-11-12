@@ -42,7 +42,7 @@ defmodule FileWatch.Assets do
     File.Error ->
       """
       Please check following file exists in CWD,
-      path: #{path},
+      path: #{path}
       Or use `--config-template` option to get it.
       """
       |> FileWatch.highlight()
