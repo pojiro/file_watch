@@ -36,19 +36,10 @@ defmodule FileWatch.FsSubscriber do
   def handle_info({:file_event, pid, {path, events}}, %State{} = state)
       when is_pid(pid) and is_binary(path) and is_list(events) do
     if match_any_patterns?(path, state.config.patterns) do
-      Logger.debug("matched path: #{path} 👀")
-
-      close_ports(Map.keys(state.port_map))
-
-      port_map =
-        case :os.type() do
-          {:win32, _} -> run_on_win(state.config.commands)
-          _ -> run(state.config.commands, state.wrapper_file_path)
-        end
-        |> then(&to_port_map(state.config.commands, &1))
-
       debounce(state.config.debounce)
 
+      close_ports(Map.keys(state.port_map))
+      port_map = run(state.config.commands, state.wrapper_file_path)
       {:noreply, %State{state | port_map: port_map}}
     else
       {:noreply, state}
@@ -84,11 +75,21 @@ defmodule FileWatch.FsSubscriber do
     |> Enum.reduce(%{}, fn {command, port}, port_map -> Map.put(port_map, port, command) end)
   end
 
-  def run(commands, wrapper_file_path) when is_list(commands) and is_binary(wrapper_file_path) do
-    Enum.map(commands, fn command -> run(command, wrapper_file_path) end)
+  def run(commands, wrapper_file_path) do
+    case :os.type() do
+      {:win32, _} -> run_on_win(commands)
+      _ -> run_on_unix(commands, wrapper_file_path)
+    end
+    |> then(&to_port_map(commands, &1))
   end
 
-  def run(command, wrapper_file_path) when is_binary(command) and is_binary(wrapper_file_path) do
+  def run_on_unix(commands, wrapper_file_path)
+      when is_list(commands) and is_binary(wrapper_file_path) do
+    Enum.map(commands, fn command -> run_on_unix(command, wrapper_file_path) end)
+  end
+
+  def run_on_unix(command, wrapper_file_path)
+      when is_binary(command) and is_binary(wrapper_file_path) do
     Port.open({:spawn_executable, wrapper_file_path}, [
       :binary,
       :exit_status,
@@ -121,6 +122,13 @@ defmodule FileWatch.FsSubscriber do
   end
 
   defp match_any_patterns?(path, patterns) when is_binary(path) and is_list(patterns) do
-    Enum.any?(patterns, &String.match?(path, &1))
+    Enum.any?(patterns, &match_pattern?(path, &1))
+  end
+
+  defp match_pattern?(path, %Regex{} = pattern) when is_binary(path) do
+    if String.match?(path, pattern) do
+      Logger.debug("matched path: #{path} 👀")
+      true
+    end
   end
 end
