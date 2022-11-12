@@ -39,11 +39,8 @@ defmodule FileWatch do
   def run(assets_dir_path) do
     config_file_path = Path.join(assets_dir_path, Assets.config_file_name())
 
-    case Assets.read_config(config_file_path) do
-      {:ok, config} ->
-        Application.put_all_env(config)
-        Application.get_all_env(:logger) |> Logger.configure()
-
+    case load_config(config_file_path) do
+      :ok ->
         wrapper_file_path = Path.join(assets_dir_path, Assets.wrapper_file_name())
         Assets.create_wrapper_file(wrapper_file_path)
         run_impl(wrapper_file_path)
@@ -58,20 +55,27 @@ defmodule FileWatch do
   def run_impl(wrapper_file_path) when is_binary(wrapper_file_path) do
     # NOTE: run_impl/2 is the essential function of :file_watch,
     # which can be called either as an escript or as a mix task.
-
     Application.put_env(:file_watch, :main_pid, self())
-
-    FileWatch.Supervisor.start_link(
-      config: Application.get_all_env(:file_watch),
-      wrapper_file_path: wrapper_file_path
-    )
-
+    FileWatch.Supervisor.start_link(wrapper_file_path: wrapper_file_path)
     if on_iex?(), do: :ok, else: receive(do: (:exit -> :ok))
   end
 
   @doc false
   def exit() do
     Application.fetch_env!(:file_watch, :main_pid) |> send(:exit)
+  end
+
+  @doc false
+  def load_config(path) do
+    case Assets.read_config(path) do
+      {:ok, config} ->
+        Application.put_all_env(config)
+        Application.get_all_env(:logger) |> Logger.configure()
+        :ok
+
+      :error ->
+        :error
+    end
   end
 
   @doc false
