@@ -9,9 +9,13 @@ defmodule FileWatch.FsSubscriber do
     @type t :: %__MODULE__{
             config: FileWatch.Config.t(),
             port_map: map(),
-            wrapper_file_path: String.t()
+            wrapper_file_path: String.t(),
+            config_file_name_regex: Regex.t()
           }
-    defstruct config: %FileWatch.Config{}, port_map: %{}, wrapper_file_path: ""
+    defstruct config: %FileWatch.Config{},
+              port_map: %{},
+              wrapper_file_path: "",
+              config_file_name_regex: %Regex{}
   end
 
   def start_link(args) do
@@ -19,13 +23,19 @@ defmodule FileWatch.FsSubscriber do
   end
 
   @impl true
-  def init(config: config, wrapper_file_path: wrapper_file_path) when is_list(config) do
-    config_struct = struct(FileWatch.Config, config)
+  def init(wrapper_file_path: wrapper_file_path) do
+    initial_state = %State{
+      config: struct(FileWatch.Config, Application.get_all_env(:file_watch)),
+      wrapper_file_path: wrapper_file_path,
+      config_file_name_regex: FileWatch.Assets.config_file_name() |> file_name_regex()
+    }
 
-    case FileSystem.start_link(dirs: Enum.map(config_struct.dirs, &Path.absname(&1))) do
-      {:ok, pid} ->
-        FileSystem.subscribe(pid)
-        {:ok, %State{config: config_struct, wrapper_file_path: wrapper_file_path}}
+    watch_target_dirs = Enum.map(initial_state.config.dirs, &Path.absname(&1))
+
+    case FileSystem.start_link(dirs: watch_target_dirs, name: :fs_publisher) do
+      {:ok, _} ->
+        FileSystem.subscribe(:fs_publisher)
+        {:ok, initial_state}
 
       other ->
         {:stop, other}
@@ -35,14 +45,23 @@ defmodule FileWatch.FsSubscriber do
   @impl true
   def handle_info({:file_event, pid, {path, events}}, %State{} = state)
       when is_pid(pid) and is_binary(path) and is_list(events) do
-    if match_any_patterns?(path, state.config.patterns) do
-      debounce(state.config.debounce)
+    cond do
+      match_pattern?(path, state.config_file_name_regex) ->
+        debounce(state.config.debounce)
 
-      close_ports(Map.keys(state.port_map))
-      port_map = run(state.config.commands, state.wrapper_file_path)
-      {:noreply, %State{state | port_map: port_map}}
-    else
-      {:noreply, state}
+        GenServer.stop(:fs_publisher)
+        FileWatch.load_config(path)
+        {:stop, :normal, state}
+
+      match_any_patterns?(path, state.config.patterns) ->
+        debounce(state.config.debounce)
+
+        close_ports(Map.keys(state.port_map))
+        port_map = run(state.config.commands, state.wrapper_file_path)
+        {:noreply, %State{state | port_map: port_map}}
+
+      true ->
+        {:noreply, state}
     end
   end
 
@@ -130,5 +149,9 @@ defmodule FileWatch.FsSubscriber do
       Logger.debug("matched path: #{path} 👀")
       true
     end
+  end
+
+  defp file_name_regex(file_name) do
+    file_name |> Regex.escape() |> then(&"#{&1}$") |> Regex.compile!()
   end
 end
