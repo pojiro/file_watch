@@ -118,23 +118,6 @@ defmodule FileWatch.FsSubscriber do
     Enum.map(ports, &close_port(&1))
   end
 
-  def to_port_map(commands, ports) do
-    Enum.zip(commands, ports)
-    |> Enum.reduce(%{}, fn {command, port}, port_map -> Map.put(port_map, port, command) end)
-  end
-
-  @spec run(commands :: list(), wrapper_file_path :: String.t()) :: [port()]
-  def run(commands, wrapper_file_path) when is_list(commands) do
-    case :os.type() do
-      {:win32, _} ->
-        run_on_win(commands)
-
-      _ ->
-        FileWatch.Assets.maybe_create_wrapper_file(wrapper_file_path)
-        run_on_unix(commands, wrapper_file_path)
-    end
-  end
-
   @spec run(command :: String.t(), wrapper_file_path :: String.t()) :: port()
   def run(command, wrapper_file_path) when is_binary(command) do
     case :os.type() do
@@ -147,11 +130,6 @@ defmodule FileWatch.FsSubscriber do
     end
   end
 
-  def run_on_unix(commands, wrapper_file_path)
-      when is_list(commands) and is_binary(wrapper_file_path) do
-    Enum.map(commands, fn command -> run_on_unix(command, wrapper_file_path) end)
-  end
-
   def run_on_unix(command, wrapper_file_path)
       when is_binary(command) and is_binary(wrapper_file_path) do
     Port.open({:spawn_executable, wrapper_file_path}, [
@@ -159,10 +137,6 @@ defmodule FileWatch.FsSubscriber do
       :exit_status,
       args: ["bash", "-c", command]
     ])
-  end
-
-  def run_on_win(commands) when is_list(commands) do
-    Enum.map(commands, fn command -> run_on_win(command) end)
   end
 
   def run_on_win(command) when is_binary(command) do
