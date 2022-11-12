@@ -96,8 +96,12 @@ defmodule FileWatch.FsSubscriber do
 
   def run(commands, wrapper_file_path) do
     case :os.type() do
-      {:win32, _} -> run_on_win(commands)
-      _ -> run_on_unix(commands, wrapper_file_path)
+      {:win32, _} ->
+        run_on_win(commands)
+
+      _ ->
+        FileWatch.Assets.maybe_create_wrapper_file(wrapper_file_path)
+        run_on_unix(commands, wrapper_file_path)
     end
     |> then(&to_port_map(commands, &1))
   end

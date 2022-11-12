@@ -42,7 +42,6 @@ defmodule FileWatch do
     case load_config(config_file_path) do
       :ok ->
         wrapper_file_path = Path.join(assets_dir_path, Assets.wrapper_file_name())
-        Assets.create_wrapper_file(wrapper_file_path)
         run_impl(wrapper_file_path)
 
       :error ->

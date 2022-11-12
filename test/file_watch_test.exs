@@ -21,7 +21,6 @@ defmodule FileWatchTest do
         send(pid, :exit)
         FileWatch.run(tmp_dir_path)
 
-        assert Assets.wrapper_file_name() in File.ls!(tmp_dir_path)
         assert ^pid = Application.fetch_env!(:file_watch, :main_pid)
       end)
     end
