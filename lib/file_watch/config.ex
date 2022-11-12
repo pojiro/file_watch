@@ -5,7 +5,8 @@ defmodule FileWatch.Config do
           patterns: list(),
           debounce: non_neg_integer(),
           dirs: [String.t()],
-          commands: [String.t()]
+          commands: [String.t()],
+          parallel_exec: boolean()
         }
-  defstruct patterns: [], debounce: 0, dirs: ["."], commands: [":"]
+  defstruct patterns: [], debounce: 0, dirs: ["."], commands: [":"], parallel_exec: false
 end

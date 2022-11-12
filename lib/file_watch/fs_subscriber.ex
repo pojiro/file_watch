@@ -8,14 +8,16 @@ defmodule FileWatch.FsSubscriber do
     @moduledoc false
     @type t :: %__MODULE__{
             config: FileWatch.Config.t(),
-            port_map: map(),
+            port_map: %{} | %{port() => String.t()},
             wrapper_file_path: String.t(),
-            config_file_name_regex: Regex.t()
+            config_file_name_regex: Regex.t(),
+            left_commands: [] | [String.t()]
           }
     defstruct config: %FileWatch.Config{},
               port_map: %{},
               wrapper_file_path: "",
-              config_file_name_regex: %Regex{}
+              config_file_name_regex: %Regex{},
+              left_commands: []
   end
 
   def start_link(args) do
@@ -24,6 +26,8 @@ defmodule FileWatch.FsSubscriber do
 
   @impl true
   def init(wrapper_file_path: wrapper_file_path) do
+    Process.flag(:trap_exit, true)
+
     initial_state = %State{
       config: struct(FileWatch.Config, Application.get_all_env(:file_watch)),
       wrapper_file_path: wrapper_file_path,
@@ -57,8 +61,20 @@ defmodule FileWatch.FsSubscriber do
         debounce(state.config.debounce)
 
         close_ports(Map.keys(state.port_map))
-        port_map = run(state.config.commands, state.wrapper_file_path)
-        {:noreply, %State{state | port_map: port_map}}
+
+        if state.config.parallel_exec do
+          port_map =
+            Enum.reduce(state.config.commands, %{}, fn command, acc ->
+              Map.put(acc, run(command, state.wrapper_file_path), command)
+            end)
+
+          {:noreply, %State{state | port_map: port_map, left_commands: []}}
+        else
+          [command | left_commands] = state.config.commands
+          port_map = Map.put(%{}, run(command, state.wrapper_file_path), command)
+
+          {:noreply, %State{state | port_map: port_map, left_commands: left_commands}}
+        end
 
       true ->
         {:noreply, state}
@@ -81,6 +97,19 @@ defmodule FileWatch.FsSubscriber do
     {:noreply, state}
   end
 
+  @impl true
+  def handle_info({:EXIT, _port, :normal}, %State{left_commands: []} = state) do
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({:EXIT, _port, :normal}, state) do
+    [command | left_commands] = state.left_commands
+    port_map = Map.put(state.port_map, run(command, state.wrapper_file_path), command)
+
+    {:noreply, %State{state | port_map: port_map, left_commands: left_commands}}
+  end
+
   defp close_port(port) when is_port(port) do
     if not is_nil(Port.info(port)), do: Port.close(port)
   end
@@ -94,7 +123,8 @@ defmodule FileWatch.FsSubscriber do
     |> Enum.reduce(%{}, fn {command, port}, port_map -> Map.put(port_map, port, command) end)
   end
 
-  def run(commands, wrapper_file_path) do
+  @spec run(commands :: list(), wrapper_file_path :: String.t()) :: [port()]
+  def run(commands, wrapper_file_path) when is_list(commands) do
     case :os.type() do
       {:win32, _} ->
         run_on_win(commands)
@@ -103,7 +133,18 @@ defmodule FileWatch.FsSubscriber do
         FileWatch.Assets.maybe_create_wrapper_file(wrapper_file_path)
         run_on_unix(commands, wrapper_file_path)
     end
-    |> then(&to_port_map(commands, &1))
+  end
+
+  @spec run(command :: String.t(), wrapper_file_path :: String.t()) :: port()
+  def run(command, wrapper_file_path) when is_binary(command) do
+    case :os.type() do
+      {:win32, _} ->
+        run_on_win(command)
+
+      _ ->
+        FileWatch.Assets.maybe_create_wrapper_file(wrapper_file_path)
+        run_on_unix(command, wrapper_file_path)
+    end
   end
 
   def run_on_unix(commands, wrapper_file_path)

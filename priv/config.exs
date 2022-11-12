@@ -5,6 +5,8 @@ config :file_watch,
   commands: [
     "echo -e \"  using default config file,\n  modify CWD/.fwatch.exs to fit your use case. 👀\n\""
   ],
+  # if true, commands are executed in parallel
+  parallel_exec: false,
   # path detecting patterns, should be written in regex
   # refs. https://hexdocs.pm/elixir/Regex.html
   patterns: [~r".*"],
