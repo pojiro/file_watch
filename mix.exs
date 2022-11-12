@@ -22,7 +22,7 @@ defmodule FileWatch.MixProject do
     ]
   end
 
-  def version(), do: "0.2.0"
+  def version(), do: "0.2.1"
   def escript_file_name(), do: "fwatch"
   def description(), do: "File Watcher 👀, like mix test.watch."
 
