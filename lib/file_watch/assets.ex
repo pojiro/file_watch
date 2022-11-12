@@ -53,6 +53,10 @@ defmodule FileWatch.Assets do
 
   def wrapper_file_name(), do: @wrapper_file_name
 
+  def maybe_create_wrapper_file(path) do
+    if not File.exists?(path), do: create_wrapper_file(path)
+  end
+
   def create_wrapper_file(path) do
     File.write!(path, @wrapper_content)
     File.chmod!(path, 0o775)
