@@ -17,7 +17,7 @@ Because TDD with [mix test.watch](https://github.com/lpil/mix-test.watch) is awe
 ### Installation
 
 Install escript from hex or github,  
-(if you use asdf, after following. Don't forget to do `asdf reshim`)
+(if you use asdf, after following. Don't forget to do `asdf reshim elixir`)
 
 ```
 mix escript.install hex file_watch # Or mix escript.install github pojiro/file_watch
