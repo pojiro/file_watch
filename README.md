@@ -59,6 +59,11 @@ FileWatch uses or refs the following OSS and so on,
 I didn't know about `fswatch` until I developed FileWatch.
 If FileWatch doesn't fit your needs, please check out [`fswatch`](https://github.com/emcrisostomo/fswatch).
 
+## How to release
+
+1. bump version
+2. `mix hex.publish`
+
 ---
 
 Copyright © 2022 Ryota Kinukawa
